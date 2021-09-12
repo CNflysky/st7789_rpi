@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "stdbool.h": "c",
-        "signal.h": "c",
-        "st7789_spi.h": "c"
-    }
-}
