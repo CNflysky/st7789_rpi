@@ -2,6 +2,7 @@
 #define _ST7789_IPS_H_
 
 #include "st7789_delay.h"
+#include "st7789_font.h"
 #include "st7789_gpio.h"
 #include "st7789_spi.h"
 uint16_t st7789_width;
@@ -22,6 +23,10 @@ void st7789_draw_rectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
                            uint16_t color, bool filled);
 void st7789_draw_char(uint16_t x, uint16_t y, uint8_t num, uint16_t fc,
                       uint16_t bc, uint8_t sizey, uint8_t mode);
+void st7789_draw_chinese_char(uint16_t x, uint16_t y, fonts_t type, uint8_t *ch,
+                              uint16_t fontc, uint16_t backgroundc);
+void st7789_draw_chinese_string(uint16_t x, uint16_t y, fonts_t font,
+                                uint8_t *str, uint16_t fcolor, uint16_t bcolor);
 // void st7789_draw_string(uint8_t x, uint8_t y, fontname_t font, uint8_t *str);
 // void st7789_draw_char(uint8_t x, uint8_t y, fontname_t font, uint8_t ch);
 #endif

@@ -34,7 +34,7 @@ void st7789_spi_write_8bit(datatype_t type, uint8_t data) {
                                  .delay_usecs = 0,
                                  .len = 1,
                                  .speed_hz = st7789_spi_speed};
-  if (ioctl(st7789_spi_fd, SPI_IOC_MESSAGE(1), &spi) < 0){
+  if (ioctl(st7789_spi_fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
     perror("Error writing 8bit data to spi");
     exit(EXIT_FAILURE);
   }
@@ -56,8 +56,8 @@ void st7789_spi_write_16bit(uint16_t data) {
                                  .delay_usecs = 0,
                                  .len = 2,
                                  .speed_hz = st7789_spi_speed};
-  if (ioctl(st7789_spi_fd, SPI_IOC_MESSAGE(1), &spi) < 0)
-    {perror("Error writting 16bit data to spi");
+  if (ioctl(st7789_spi_fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
+    perror("Error writting 16bit data to spi");
     exit(EXIT_FAILURE);
   }
 }
@@ -69,7 +69,7 @@ void st7789_spi_write_8bytes(uint8_t *data, uint16_t len) {
                                  .delay_usecs = 0,
                                  .len = len,
                                  .speed_hz = st7789_spi_speed};
-  if(ioctl(st7789_spi_fd, SPI_IOC_MESSAGE(1), &spi) < 0){
+  if (ioctl(st7789_spi_fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
     perror("Error writting 8bit bytes to spi");
     exit(EXIT_FAILURE);
   }
