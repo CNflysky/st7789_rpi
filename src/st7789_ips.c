@@ -226,11 +226,9 @@ void st7789_draw_chinese_string(uint16_t x, uint16_t y, fonts_t font,
       distance = 32;
       break;
   }
-  uint16_t count = (sizeof str - 1) / 3;  //'\0'
-  printf("%d\n", count);
   uint8_t buf[3] = {0x00};
   uint16_t offset = 0;
-  for (uint8_t i = 0; i < count; i++) {
+  for (uint8_t i = 0; i < strlen(str) / 3; i++) {
     memcpy(buf, str + offset, 3);
     st7789_draw_chinese_char(x0, y, font, buf, fcolor, bcolor);
     offset += 3;

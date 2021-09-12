@@ -23,14 +23,27 @@ int main() {
   st7789_spi_set_mode(SPI_MODE_2);
   st7789_spi_set_speed(40000000);
   st7789_init(240, 240);
-  // st7789_fill_screen(0xFFFF);
-  // st7789_draw_chinese_char(0, 0, gb2312_24x24, "测", 0xFFFF, 0x0000);
-  st7789_draw_chinese_string(0, 0, gb2312_32x32, "测试", 0xFFFF, 0x0000);
-  /*while (1) {
+  while (1) {
     for (uint8_t i = 'A'; i < 'Z' + 1; i++) {
-      st7789_draw_char(113, 103, i, 0xFFFF, 0x001F, 32, false);
-      st7789_delay(250);
+      /*st7789_draw_chinese_string(0, 0, gb2312_12x12, "树莓派测试", 0xFFFF,
+                                 0x0000);
+      st7789_delay(500);
+      st7789_clear_screen();
+      st7789_draw_chinese_string(0, 0, gb2312_15x16, "树莓派测试", 0xFFFF,
+                                 0x0000);
+      st7789_delay(500);
+      st7789_clear_screen();
+
+      st7789_draw_chinese_string(0, 0, gb2312_24x24, "树莓派测试", 0xFFFF,
+                                 0x0000);
+      st7789_delay(500);
+      st7789_clear_screen();*/
+
+      st7789_draw_chinese_string(0, 0, gb2312_32x32, "树莓派测试", 0xFFFF,
+                                 0x0000);
+      st7789_delay(500);
+      //st7789_clear_screen();
     }
-  }*/
+  }
   return 0;
 }
