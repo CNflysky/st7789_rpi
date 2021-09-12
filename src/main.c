@@ -9,14 +9,14 @@ void signal_handler(int sig) {
 
 int main() {
   signal(SIGINT, signal_handler);
-  /*st7789_dc = st7789_gpiod_request_gpio("gpiochip1", "st7789_dc", 70);
-  //st7789_reset = st7789_gpiod_request_gpio("gpiochip1", "st7789_reset", 69);
-  //st7789_spi_open("/dev/spidev1.1");*/
+  st7789_dc = st7789_gpiod_request_gpio("gpiochip1", "st7789_dc", 70);
+  st7789_reset = st7789_gpiod_request_gpio("gpiochip1", "st7789_reset", 69);
+  st7789_spi_open("/dev/spidev1.1");
 
-  st7789_dc = st7789_gpiod_request_gpio("gpiochip1", "st7789_dc", 18);
+  /*st7789_dc = st7789_gpiod_request_gpio("gpiochip1", "st7789_dc", 18);
   st7789_reset = st7789_gpiod_request_gpio("gpiochip1", "st7789_reset", 17);
-  st7789_spi_open("/dev/spidev0.0");
-  
+  st7789_spi_open("/dev/spidev0.0");*/
+
   st7789_spi_set_mode(SPI_MODE_2);
   st7789_spi_set_speed(40000000);
   st7789_init(240, 240);
