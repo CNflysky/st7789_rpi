@@ -5,6 +5,16 @@
 #include "st7789_font.h"
 #include "st7789_gpio.h"
 #include "st7789_spi.h"
+
+typedef enum {
+  RED = 0xF800,
+  YELLOW = 0xFFE0,
+  BLUE = 0x001F,
+  GREEN = 0x0400,
+  WHITE = 0xFFFF,
+  BLACK = 0x0000
+} colors_t;
+
 uint16_t st7789_width;
 uint16_t st7789_height;
 void st7789_init(uint16_t height, uint16_t width);
@@ -24,9 +34,14 @@ void st7789_draw_rectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
 void st7789_draw_char(uint16_t x, uint16_t y, uint8_t num, uint16_t fc,
                       uint16_t bc, uint8_t sizey, uint8_t mode);
 void st7789_draw_chinese_char(uint16_t x, uint16_t y, fonts_t type, uint8_t *ch,
-                              uint16_t fontc, uint16_t backgroundc);
+                              uint16_t fcolor);
 void st7789_draw_chinese_string(uint16_t x, uint16_t y, fonts_t font,
-                                uint8_t *str, uint16_t fcolor, uint16_t bcolor);
-// void st7789_draw_string(uint8_t x, uint8_t y, fontname_t font, uint8_t *str);
-// void st7789_draw_char(uint8_t x, uint8_t y, fontname_t font, uint8_t ch);
+                                uint8_t *str, uint16_t fcolor);
+void st7789_draw_ascii_char(uint16_t x, uint16_t y, fonts_t type, uint8_t ch,
+                            uint16_t fcolor);
+void st7789_display_font_data(uint16_t x, uint16_t y, uint16_t fontwidth,
+                              uint16_t fontheight, uint16_t fontsize,
+                              uint8_t *buf, uint16_t color, uint8_t spec);
+void st7789_draw_ascii_string(uint16_t x, uint16_t y, fonts_t font,
+                              uint8_t *str, uint16_t fcolor);
 #endif

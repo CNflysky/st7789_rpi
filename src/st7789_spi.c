@@ -1,4 +1,9 @@
 #include "st7789_spi.h"
+#if __SIZEOF_POINTER__ == 4
+# define _POINTER_CONVERT_TO_ uint32_t
+#else
+# define _POINTER_CONVERT_TO_ uint64_t
+#endif
 
 void st7789_spi_open(const uint8_t *spidev_path) {
   if ((st7789_spi_fd = open(spidev_path, O_NONBLOCK)) < 0) {
@@ -29,7 +34,7 @@ void st7789_spi_set_speed(uint32_t speed) {
 void st7789_spi_write_8bit(datatype_t type, uint8_t data) {
   uint8_t *buf = &data;
   gpiod_line_set_value(st7789_dc, type);
-  struct spi_ioc_transfer spi = {.tx_buf = (uint64_t)buf,
+  struct spi_ioc_transfer spi = {.tx_buf = (_POINTER_CONVERT_TO_)buf,
                                  .rx_buf = 0,
                                  .delay_usecs = 0,
                                  .len = 1,
@@ -51,7 +56,7 @@ void st7789_spi_write_16bit(uint16_t data) {
   data_u.val = data;
   uint8_t buf[2] = {data_u.msb, data_u.lsb};
   gpiod_line_set_value(st7789_dc, DATA);
-  struct spi_ioc_transfer spi = {.tx_buf = (uint64_t)buf,
+  struct spi_ioc_transfer spi = {.tx_buf = (_POINTER_CONVERT_TO_)buf,
                                  .rx_buf = 0,
                                  .delay_usecs = 0,
                                  .len = 2,
@@ -64,7 +69,7 @@ void st7789_spi_write_16bit(uint16_t data) {
 
 void st7789_spi_write_8bytes(uint8_t *data, uint16_t len) {
   gpiod_line_set_value(st7789_dc, DATA);
-  struct spi_ioc_transfer spi = {.tx_buf = (uint64_t)data,
+  struct spi_ioc_transfer spi = {.tx_buf = (_POINTER_CONVERT_TO_)data,
                                  .rx_buf = 0,
                                  .delay_usecs = 0,
                                  .len = len,

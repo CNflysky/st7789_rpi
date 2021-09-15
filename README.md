@@ -4,7 +4,7 @@ Display module must connected to board using **Hardware SPI**.
 
 # How to use
 ## Wire your module to the board:  
-| SSD1315 PIN | RPI 4B |
+| ST7789 PIN | RPI 4B |
 | - | - |  
 | VCC | 3.3V |  
 | GND | 0V/GND |  

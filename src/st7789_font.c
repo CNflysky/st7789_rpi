@@ -1,5 +1,9 @@
 #include "st7789_font.h"
-
+#if __SIZEOF_POINTER__ == 4
+#define _POINTER_CONVERT_TO_ uint32_t
+#else
+#define _POINTER_CONVERT_TO_ uint64_t
+#endif
 void st7789_gt30_spi_open(uint8_t* path) {
   if ((st7789_gt30_spi_fd = open(path, O_NONBLOCK)) < 0) {
     perror("Error:open font chip spidev failed!");
@@ -30,19 +34,20 @@ void st7789_gt30_spi_set_speed(uint32_t speed) {
 void st7789_gt30_get_char_data(uint8_t* addr, uint8_t* data, uint16_t len) {
   uint8_t cmd_with_addr[4] = {0x03};
   memcpy(cmd_with_addr + 1, addr, 3);
-  struct spi_ioc_transfer spi_cmd = {.speed_hz = st7789_gt30_spi_speed,
-                                     .tx_buf = (uint64_t)cmd_with_addr,
-                                     .rx_buf = 0,
-                                     .delay_usecs = 0,
-                                     .len = 4,
-                                     .cs_change = true};
+  struct spi_ioc_transfer spi_cmd = {
+      .speed_hz = st7789_gt30_spi_speed,
+      .tx_buf = (_POINTER_CONVERT_TO_)cmd_with_addr,
+      .rx_buf = 0,
+      .delay_usecs = 0,
+      .len = 4,
+      .cs_change = true};
   if (ioctl(st7789_gt30_spi_fd, SPI_IOC_MESSAGE(1), &spi_cmd) < 0) {
     perror("Error:send command and address to gt30 error");
     exit(EXIT_FAILURE);
   }
   struct spi_ioc_transfer spi_data = {.speed_hz = st7789_gt30_spi_speed,
-                                      .tx_buf = (uint64_t)data,
-                                      .rx_buf = (uint64_t)data,
+                                      .tx_buf = (_POINTER_CONVERT_TO_)data,
+                                      .rx_buf = (_POINTER_CONVERT_TO_)data,
                                       .delay_usecs = 0,
                                       .len = len};
   if (ioctl(st7789_gt30_spi_fd, SPI_IOC_MESSAGE(1), &spi_data) < 0) {
@@ -105,4 +110,12 @@ void st7789_gt30_caculate_chinese_address(fonts_t type, uint8_t msb,
   addrbuf[0] = (address & 0xff0000) >> 16;
   addrbuf[1] = (address & 0xff00) >> 8;
   addrbuf[2] = address & 0xff;
+}
+
+uint32_t st7789_gt30_caculate_ascii_address(uint32_t baseaddr,
+                                            uint16_t fontsize, uint8_t ch) {
+  if (ch >= 0x20 && ch <= 0x7E)
+    return (ch - 0x20) * fontsize + baseaddr;
+  else
+    return -1;
 }
