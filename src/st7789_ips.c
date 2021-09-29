@@ -65,7 +65,9 @@ void st7789_init(uint16_t width, uint16_t height) {
   st7789_spi_write_8bit(DATA, 0x23);
   st7789_spi_write_8bit(COMMAND, 0x21);
   st7789_spi_write_8bit(COMMAND, 0x11);
+  st7789_clear_buf();
   st7789_clear_screen();
+  st7789_send_buf();
   st7789_spi_write_8bit(COMMAND, 0x29);
   st7789_spi_write_8bit(COMMAND, 0x36);
   st7789_spi_write_8bit(DATA, 0x00);
@@ -85,37 +87,19 @@ void st7789_set_display_area(uint16_t x0, uint16_t y0, uint16_t x1,
 }
 
 void st7789_draw_point(uint16_t x, uint16_t y, uint16_t color) {
-  st7789_set_display_area(x, y, x + 1, y + 1);
-  st7789_spi_write_16bit(color);
+  st7789_buffer[y * st7789_width + x] = color;
 }
 
 void st7789_fill_screen(uint16_t color) {
-  st7789_set_display_area(0, 0, st7789_width - 1, st7789_height - 1);
-  union {
-    uint16_t val;
-    struct {
-      uint8_t lsb;
-      uint8_t msb;
-    };
-  } data_u;
-  data_u.val = color;
-  uint8_t color_buf[4096] = {0x00};
-  uint16_t buffer_mark = 0;
-  for (uint16_t i = 0; i < 2048; i++) {
-    color_buf[buffer_mark] = data_u.lsb;
-    color_buf[buffer_mark + 1] = data_u.msb;
-    buffer_mark += 2;
-  }
-  for (uint8_t i = 0; i < (st7789_width * st7789_height / 2048 + 1); i++)
-    st7789_spi_write_8bytes(color_buf, 4096);
+  for (uint32_t i = 0; i < (st7789_height * st7789_width) - 1; i++)
+    st7789_buffer[i] = color;
 }
 
 void st7789_clear_screen() { st7789_fill_screen(BLACK); }
 
 void st7789_draw_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
                       uint16_t color) {
-  uint16_t t;
-  uint16_t xerr = 0, yerr = 0, delta_x = x2 - x1, delta_y = y2 - y1, distance;
+  int16_t xerr = 0, yerr = 0, delta_x = x2 - x1, delta_y = y2 - y1, distance;
   uint16_t incx, incy, uRow = x1, uCol = y1;
 
   if (delta_x > 0)
@@ -137,7 +121,7 @@ void st7789_draw_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
   }
 
   (delta_x > delta_y) ? (distance = delta_x) : (distance = delta_y);
-  for (t = 0; t <= distance + 1; t++) {
+  for (uint16_t t = 0; t <= distance + 1; t++) {
     st7789_draw_point(uRow, uCol, color);
     xerr += delta_x;
     yerr += delta_y;
@@ -195,11 +179,8 @@ void st7789_draw_circle(uint16_t xc, uint16_t yc, uint16_t radius,
 void st7789_draw_rectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
                            uint16_t color, bool filled) {
   if (filled) {
-    st7789_set_display_area(x1, y1, x2, y2);
-    uint16_t buffer[(x2 + 1 - x1) * (y2 + 1 - y1)];
-    for (uint16_t i = 0; i < (x2 + 1 - x1) * (y2 + 1 - y1); i++)
-      buffer[i] = color;
-    st7789_spi_write_16bytes(buffer, (x2 + 1 - x1) * (y2 + 1 - y1));
+    for (uint16_t i = y1; i < y2; i++)
+      for (uint16_t j = x1; j < x2; j++) st7789_draw_point(j, i, color);
   } else {
     st7789_draw_line(x1, y1, x2, y1, color);
     st7789_draw_line(x1, y1, x1, y2, color);
@@ -454,4 +435,96 @@ void st7789_draw_ascii_string(uint16_t x, uint16_t y, fonts_t font,
     st7789_draw_ascii_char(x0, y, font, str[i], fcolor);
     x0 += distance;
   }
+}
+
+void st7789_draw_string_mixed(uint16_t x, uint16_t y, fonts_t ascfont,
+                              fonts_t cnfont, uint8_t *str, uint16_t color) {
+  uint16_t asc_distance = 0, cn_distance = 0, x0 = x;
+  uint8_t cn_buf[3] = {0x00};
+  switch (ascfont) {
+    case ascii_standard_5x7:
+      asc_distance = 5;
+      break;
+    case ascii_standard_6x12:
+      asc_distance = 6;
+      break;
+    case ascii_standard_7x8:
+      asc_distance = 7;
+      break;
+    case ascii_standard_8x16:
+      asc_distance = 8;
+      break;
+    case ascii_12x24:
+      asc_distance = 12;
+      break;
+    case ascii_16x32:
+      asc_distance = 16;
+      break;
+    case ascii_arial_10x12:
+      asc_distance = 10;
+      break;
+    case ascii_arial_12x16:
+      asc_distance = 12;
+      break;
+    case ascii_arial_20x24:
+      asc_distance = 20;
+      break;
+    case ascii_arial_25x32:
+      asc_distance = 25;
+      break;
+    case ascii_times_10x12:
+      asc_distance = 10;
+      break;
+    case ascii_times_12x16:
+      asc_distance = 12;
+      break;
+    case ascii_times_20x24:
+      asc_distance = 20;
+      break;
+    case ascii_times_25x32:
+      asc_distance = 25;
+      break;
+  }
+  switch (cnfont) {
+    case gb2312_12x12:
+      cn_distance = 12;
+      break;
+    case gb2312_15x16:
+      cn_distance = 16;
+      break;
+    case gb2312_24x24:
+      cn_distance = 24;
+      break;
+    case gb2312_32x32:
+      cn_distance = 32;
+      break;
+  }
+
+  for (uint16_t i = 0; i < strlen(str); i++) {
+    if (str[i] >= 0x20 && str[i] <= 0x7E) {
+      st7789_draw_ascii_char(x0, y, ascfont, str[i], color);
+      x0 += asc_distance;
+    } else {
+      memcpy(cn_buf, &str[i], 3);  // chinese
+      i += 2;
+      st7789_draw_chinese_char(x0, y, cnfont, cn_buf, color);
+      x0 += cn_distance;
+      // printf("%s\n", cn);
+    }
+  }
+}
+
+void st7789_draw_pic(uint16_t x, uint16_t y, uint16_t pic_height,
+                     uint16_t pic_width, uint8_t *pic) {
+  st7789_set_display_area(x, y, x + pic_width - 1, y + pic_height - 1);
+  st7789_spi_write_8bytes(pic, pic_height * pic_width);
+}
+
+void st7789_send_buf() {
+  st7789_set_display_area(0, 0, st7789_width - 1, st7789_height - 1);
+  st7789_spi_write_16bytes(st7789_buffer, st7789_height * st7789_width);
+}
+
+void st7789_clear_buf() {
+  memset(st7789_buffer, 0x0000, st7789_height * st7789_width * 2);
 }
