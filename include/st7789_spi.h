@@ -19,7 +19,8 @@ void st7789_spi_set_speed(uint32_t speed);
 void st7789_spi_write_8bit(datatype_t type, uint8_t data);
 void st7789_spi_write_16bit(uint16_t data);
 bool st7789_spi_fd_close();
-void st7789_spi_write_8bytes(uint8_t* data,uint16_t len);
-void st7789_spi_write_16bytes(uint16_t *data, uint16_t len);
+void st7789_spi_write_8bytes(uint8_t* data,uint32_t len);
+void st7789_spi_write_16bytes(uint16_t *data, uint32_t len);
+void st7789_spi_write_8bytes_limited(uint8_t *data, uint16_t len);
 
 #endif

@@ -24,8 +24,9 @@ typedef enum {
   ascii_times_12x16,
   ascii_times_20x24,
   ascii_times_25x32
-
 } fonts_t;
+
+typedef enum { BASEADDR, SIZE, WIDTH, HEIGHT, OFFSET } fontdata_t;
 
 #include <iconv.h>
 
@@ -37,12 +38,14 @@ int st7789_gt30_spi_speed;
 void st7789_gt30_spi_open(uint8_t* path);
 void st7789_gt30_spi_set_mode(uint8_t mode);
 void st7789_gt30_spi_set_speed(uint32_t speed);
-void st7789_gt30_get_char_data(uint8_t* addr, uint8_t* data, uint16_t len);
+void st7789_gt30_read_data(uint8_t* addr, uint8_t* data, uint16_t len);
 void st7789_gt30_convert_utf8_to_gb2312(uint8_t* str, uint16_t in_len,
                                         uint8_t* outbuf, uint16_t out_len);
-void st7789_gt30_caculate_chinese_address(fonts_t type, uint8_t msb,
-                                          uint8_t lsb, uint8_t* addrbuf);
-uint32_t st7789_gt30_caculate_ascii_address(uint32_t baseaddr,
+void st7789_gt30_get_gb2312_addr(fonts_t type, uint8_t msb, uint8_t lsb,
+                                 uint32_t addr, uint8_t size, uint8_t* addrbuf);
+uint32_t st7789_gt30_get_ascii_addr(uint32_t baseaddr,
                                             uint16_t fontsize, uint8_t ch);
+uint32_t st7789_gt30_get_font_detail(fonts_t font, fontdata_t type);
+void st7789_gt30_close_spi_fd();
 
 #endif

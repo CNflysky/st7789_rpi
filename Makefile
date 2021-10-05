@@ -1,7 +1,7 @@
 DIR_CUR = $(shell pwd)
 DIR_SRC = $(DIR_CUR)/src
 DIR_INC = $(DIR_CUR)/include
-DIR_OUT = $(DIR_CUR)
+DIR_OUT = $(DIR_CUR)/bin
 
 OBJ_C = $(wildcard ${DIR_SRC}/*.c)
 OBJ_O = $(patsubst %.c,${DIR_OUT}/%.o,$(notdir ${OBJ_C}))

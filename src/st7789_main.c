@@ -1,11 +1,43 @@
 #include <signal.h>
 
+#include "keqing.h"
 #include "st7789_ips.h"
-
-void signal_handler(int sig) {
+void st7789_test_procedure();
+void exit_handler() {
   st7789_clear_screen();
   st7789_send_buf();
   st7789_spi_fd_close();
+  st7789_gt30_close_spi_fd();
+}
+
+int main() {
+  /*
+  Typically usage:
+  1st: acquire 'st7789_dc' & 'st7789_reset' these 2 gpios.
+  2nd: open spidev and set main spi param.
+  optional:set font chip spi param.
+  3rd: init screen.
+  4th: clear_buf()
+  5th: draw sth on screen.
+  6th: send_buf().
+  */
+  signal(SIGINT, exit_handler);
+
+  // init gpio
+  st7789_dc = st7789_gpiod_request_gpio("gpiochip0", "st7789_dc", 199);
+  st7789_reset = st7789_gpiod_request_gpio("gpiochip0", "st7789_reset", 198);
+  // init main spidev (screen)
+  st7789_spi_open("/dev/spidev1.0");
+  st7789_spi_set_mode(SPI_MODE_2);
+  st7789_spi_set_speed(48000000);  // 48 Mhz
+
+  // init font spidev (on-board font chip)
+  st7789_gt30_spi_open("/dev/spidev1.1");
+  st7789_gt30_spi_set_mode(SPI_MODE_0);
+  st7789_gt30_spi_set_speed(40000000);  // 40 MHz
+  st7789_init(240, 320);
+  st7789_test_procedure();
+  return 0;
 }
 
 void st7789_draw_outline(uint8_t* str) {
@@ -121,28 +153,14 @@ void st7789_test_procedure() {
     st7789_fill_screen(BLUE);
     st7789_send_buf();
     sleep(2);
+    st7789_draw_outline("图片显示测试");
+    st7789_draw_string_mixed(20, 100, ascii_times_20x24, gb2312_24x24,
+                             "2秒后开始", WHITE);
+    st7789_send_buf();
+    sleep(2);
+    st7789_clear_buf();
+    st7789_send_buf();
+    st7789_draw_pic(0, 0, 222, 240, (uint8_t*)gImage_keqing);
+    sleep(2);
   }
-}
-
-int main() {
-  signal(SIGINT, signal_handler);
-  /*st7789_dc = st7789_gpiod_request_gpio("gpiochip1", "st7789_dc", 70);
-  st7789_reset = st7789_gpiod_request_gpio("gpiochip1", "st7789_reset", 69);
-  st7789_spi_open("/dev/spidev1.1");*/
-
-  // init gpio
-  st7789_dc = st7789_gpiod_request_gpio("gpiochip0", "st7789_dc", 18);
-  st7789_reset = st7789_gpiod_request_gpio("gpiochip0", "st7789_reset", 17);
-  // init main spidev (screen)
-  st7789_spi_open("/dev/spidev0.0");
-  st7789_spi_set_mode(SPI_MODE_2);
-  st7789_spi_set_speed(40000000);  // 48 Mhz
-
-  // init font spidev (on-board font chip)
-  st7789_gt30_spi_open("/dev/spidev0.1");
-  st7789_gt30_spi_set_mode(SPI_MODE_0);
-  st7789_gt30_spi_set_speed(40000000);  // 40 MHz
-  st7789_init(240, 240);
-  st7789_test_procedure();
-  return 0;
 }
