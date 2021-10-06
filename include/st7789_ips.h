@@ -21,7 +21,7 @@ uint16_t st7789_buffer[240 * 320];  // max resolution:240*320
 void st7789_init(uint16_t width, uint16_t height);
 void st7789_set_display_area(uint16_t x0, uint16_t y0, uint16_t x1,
                              uint16_t y1);
-void st7789_draw_point(uint16_t x, uint16_t y, uint16_t color);
+void st7789_draw_pixel(uint16_t x, uint16_t y, uint16_t color);
 void st7789_fill_screen(uint16_t color);
 void st7789_clear_screen();
 void st7789_draw_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,

@@ -304,13 +304,27 @@ void st7789_draw_string_mixed(uint16_t x, uint16_t y, fonts_t ascfont,
 
 void st7789_draw_pic(uint16_t x, uint16_t y, uint16_t pic_width,
                      uint16_t pic_height, uint8_t *pic) {
-  st7789_set_display_area(x, y, x + pic_width - 1, y + pic_height - 1);
-  st7789_spi_write_8bytes(pic, pic_height * pic_width * 2);
+  uint16_t pic_buffer[pic_height * pic_width];
+  uint32_t pic_mark = 0;
+  for (uint32_t i = 0; i < pic_height * pic_width; i++) {
+    pic_buffer[i] = pic[pic_mark] << 8 | pic[pic_mark + 1];
+    pic_mark += 2;
+  }
+  uint32_t start_pos = y * st7789_width + x, offset = 0,
+           empty_pixels = st7789_width - pic_width;
+  for (uint16_t i = 0; i < pic_height; i++) {
+    for (uint16_t j = 0; j < pic_width; j++) {
+      memcpy(st7789_buffer + start_pos, pic_buffer + offset,
+             pic_width * 2);  // uint16_t = 2 bytes
+    }
+    start_pos += pic_width + empty_pixels;
+    offset += pic_width;
+  }
 }
 
 void st7789_send_buf() {
   st7789_set_display_area(0, 0, st7789_width - 1, st7789_height - 1);
-  st7789_spi_write_16bytes(st7789_buffer, st7789_height * st7789_width);
+  st7789_spi_write_multi16(st7789_buffer, st7789_height * st7789_width);
 }
 
 void st7789_clear_buf() { memset(st7789_buffer, 0x0000, sizeof st7789_buffer); }

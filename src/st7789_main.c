@@ -35,7 +35,7 @@ int main() {
   st7789_gt30_spi_open("/dev/spidev1.1");
   st7789_gt30_spi_set_mode(SPI_MODE_0);
   st7789_gt30_spi_set_speed(40000000);  // 40 MHz
-  st7789_init(240, 320);
+  st7789_init(240, 240);
   st7789_test_procedure();
   return 0;
 }
@@ -159,8 +159,8 @@ void st7789_test_procedure() {
     st7789_send_buf();
     sleep(2);
     st7789_clear_buf();
-    st7789_send_buf();
     st7789_draw_pic(0, 0, 222, 240, (uint8_t*)gImage_keqing);
+    st7789_send_buf();
     sleep(2);
   }
 }

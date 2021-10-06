@@ -67,28 +67,7 @@ void st7789_spi_write_16bit(uint16_t data) {
   }
 }
 
-void st7789_spi_write_8bytes(uint8_t *data, uint32_t len) {
-  gpiod_line_set_value(st7789_dc, DATA);
-  if (len > 4096) {
-    // data length longer than 4096
-    uint32_t addr = 0;
-    uint16_t round = len / 4096;
-    uint16_t remain_data_count = len - (round * 4096);
-    uint16_t remain_addr = len - remain_data_count;
-    // send multiple bulk data
-    uint8_t buf[4096];
-    for (uint16_t i = 0; i < round; i++) {
-      memcpy(buf, data + addr, 4096);
-      st7789_spi_write_8bytes_limited(buf, 4096);
-      addr += 4096;
-    }
-    // send remaining data
-    st7789_spi_write_8bytes_limited(data + remain_addr, remain_data_count);
-  } else
-    st7789_spi_write_8bytes_limited(data, len);
-}
-
-void st7789_spi_write_8bytes_limited(uint8_t *data, uint16_t len) {
+void st7789_spi_write_multi(uint8_t *data, uint16_t len) {
   gpiod_line_set_value(st7789_dc, DATA);
   struct spi_ioc_transfer spi = {.tx_buf = (_POINTER_CONVERT_TO_)data,
                                  .rx_buf = 0,
@@ -101,7 +80,7 @@ void st7789_spi_write_8bytes_limited(uint8_t *data, uint16_t len) {
   }
 }
 
-void st7789_spi_write_16bytes(uint16_t *data, uint32_t len) {
+void st7789_spi_write_multi16(uint16_t *data, uint32_t len) {
   union {
     uint16_t val;
     struct {
@@ -116,7 +95,7 @@ void st7789_spi_write_16bytes(uint16_t *data, uint32_t len) {
       data_u.val = data[i / 2];
       (i % 2) ? (buffer[i] = data_u.lsb) : (buffer[i] = data_u.msb);
     }
-    st7789_spi_write_8bytes_limited(buffer, sizeof buffer);
+    st7789_spi_write_multi(buffer, sizeof buffer);
   } else {
     uint8_t buffer[4096] = {0x0};
     uint8_t round = len / 2048;
@@ -133,7 +112,7 @@ void st7789_spi_write_16bytes(uint16_t *data, uint32_t len) {
       buffer_mark = 0;
       start += 2048;
       end += 2048;
-      st7789_spi_write_8bytes_limited(buffer, 4096);
+      st7789_spi_write_multi(buffer, 4096);
     }
     if (remain_pixels > 0) {
       uint8_t buffer[remain_pixels * 2];
@@ -144,7 +123,7 @@ void st7789_spi_write_16bytes(uint16_t *data, uint32_t len) {
         buffer[buffer_mark + 1] = data_u.lsb;
         buffer_mark += 2;
       }
-      st7789_spi_write_8bytes_limited(buffer, sizeof buffer);
+      st7789_spi_write_multi(buffer, sizeof buffer);
     }
   }
 }
