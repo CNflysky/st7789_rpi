@@ -284,8 +284,8 @@ void st7789_draw_ascii_string(uint16_t x, uint16_t y, fonts_t font,
   }
 }
 
-void st7789_draw_string_mixed(uint16_t x, uint16_t y, fonts_t ascfont,
-                              fonts_t cnfont, uint8_t *str, uint16_t color) {
+void st7789_draw_string(uint16_t x, uint16_t y, fonts_t ascfont, fonts_t cnfont,
+                        uint8_t *str, uint16_t color) {
   uint16_t asc_distance = st7789_gt30_get_font_detail(ascfont, WIDTH),
            cn_distance = st7789_gt30_get_font_detail(cnfont, WIDTH), x0 = x;
   uint8_t cn_buf[3] = {0x00};
