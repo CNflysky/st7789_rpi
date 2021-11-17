@@ -302,6 +302,16 @@ void st7789_draw_string(uint16_t x, uint16_t y, fonts_t ascfont, fonts_t cnfont,
   }
 }
 
+void st7789_printf(uint16_t x, uint16_t y, fonts_t ascfont, fonts_t gbfont,
+                   uint16_t color, const uint8_t *fmt, ...) {
+  uint8_t buf[256] = {0x00};
+  va_list arg;
+  va_start(arg, fmt);
+  vsprintf(buf, fmt, arg);
+  va_end(arg);
+  st7789_draw_string(x, y, ascfont, gbfont, buf, color);
+}
+
 void st7789_draw_pic(uint16_t x, uint16_t y, uint16_t pic_width,
                      uint16_t pic_height, uint8_t *pic) {
   uint16_t pic_buffer[pic_height * pic_width];

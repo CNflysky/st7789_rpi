@@ -1,6 +1,8 @@
 #ifndef _ST7789_IPS_H_
 #define _ST7789_IPS_H_
 
+#include <stdarg.h>
+
 #include "st7789_delay.h"
 #include "st7789_font.h"
 #include "st7789_gpio.h"
@@ -43,10 +45,12 @@ void st7789_display_font_data(uint16_t x, uint16_t y, uint16_t fontwidth,
                               uint8_t *buf, uint16_t color, uint8_t spec);
 void st7789_draw_ascii_string(uint16_t x, uint16_t y, fonts_t font,
                               uint8_t *str, uint16_t fcolor);
-void st7789_draw_string(uint16_t x, uint16_t y, fonts_t ascfont,
-                              fonts_t cnfont, uint8_t *str, uint16_t color);
+void st7789_draw_string(uint16_t x, uint16_t y, fonts_t ascfont, fonts_t cnfont,
+                        uint8_t *str, uint16_t color);
 void st7789_draw_pic(uint16_t x, uint16_t y, uint16_t pic_width,
                      uint16_t pic_height, uint8_t *pic);
+void st7789_printf(uint16_t x, uint16_t y, fonts_t ascfont, fonts_t gbfont,
+                   uint16_t color, const uint8_t *fmt, ...);
 void st7789_send_buf();
 void st7789_clear_buf();
 
