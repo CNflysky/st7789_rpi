@@ -1,5 +1,5 @@
 # st7789_rpi
-[Simplified Chinese](https://github.com/CNflysky/ssd1315_monitor/blob/main/README_zh.md)  
+[Simplified Chinese](https://github.com/CNflysky/st7789_rpi/blob/main/README_zh.md)  
 simple st7789 panel driver for Raspberry Pi / Linux-based development boards written in pure c.
 Display module must connected to board using **Hardware SPI**.
 
