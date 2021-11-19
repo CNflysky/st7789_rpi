@@ -23,7 +23,9 @@ Orange Pi Zero 2
 | SDA | GPIO10 |  
 | RES | GPIO17 |  
 | DC | GPIO18 |  
-| CS | GPIO8/GND |
+| CS1 | GPIO8 |
+| CS2 | GPIO7 |
+| FSO | GPIO9 |
 
 | ST7789 PIN | OPI Zero |
 | - | - |  
