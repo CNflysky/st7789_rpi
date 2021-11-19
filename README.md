@@ -1,4 +1,5 @@
 # st7789_rpi
+[Simplified Chinese](https://github.com/CNflysky/ssd1315_monitor/blob/main/README_zh.md)  
 simple st7789 panel driver for Raspberry Pi / Linux-based development boards written in pure c.
 Display module must connected to board using **Hardware SPI**.
 
@@ -156,6 +157,41 @@ You may need to install the `gpiod` and `make` package as well:
 ## Clone this repository  
 `git clone https://github.com/CNflysky/st7789_rpi.git`  
 
+## Modify Pin selection
+open `src/st7789_main.c`, go to the following line:
+```c
+int main() {
+  /*
+  Typically usage:
+  1st: acquire 'st7789_dc' & 'st7789_reset' these 2 gpios.
+  2nd: open spidev and set main spi param.
+  optional:set font chip spi param.
+  3rd: init screen.
+  4th: clear_buf()
+  5th: draw sth on screen.
+  6th: send_buf().
+  */
+  signal(SIGINT, exit_handler);
+
+  // init gpio
+  st7789_dc = st7789_gpiod_request_gpio("gpiochip0", "st7789_dc", 199);
+  st7789_reset = st7789_gpiod_request_gpio("gpiochip0", "st7789_reset", 198);
+  // init main spidev (screen)
+  st7789_spi_open("/dev/spidev1.0");
+  st7789_spi_set_mode(SPI_MODE_2);
+  st7789_spi_set_speed(48000000);  // 48 Mhz
+
+  // init font spidev (on-board font chip)
+  st7789_gt30_spi_open("/dev/spidev1.1");
+  st7789_gt30_spi_set_mode(SPI_MODE_0);
+  st7789_gt30_spi_set_speed(40000000);  // 40 MHz
+  st7789_init(240, 240);
+  st7789_test_procedure();
+  return 0;
+}
+```
+Modify pin selection according to comments.
+
 ## Compile and run 
-`make -j8 && ./st7789`
+`make -j8 && ./st7789` 
 If runs failed,try `sudo`.
