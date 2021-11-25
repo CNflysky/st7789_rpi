@@ -103,7 +103,7 @@ uint32_t st7789_gt30_get_ascii_addr(uint32_t baseaddr, uint16_t fontsize,
 }
 void st7789_gt30_close_spi_fd() { close(st7789_gt30_spi_fd); }
 
-uint32_t st7789_gt30_get_font_detail(fonts_t font, fontdata_t type) {
+uint32_t st7789_gt30_get_font_param(fonts_t font, fontdata_t type) {
   switch (font) {
     case ascii_standard_5x7:
       switch (type) {

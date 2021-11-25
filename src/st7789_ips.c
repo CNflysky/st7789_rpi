@@ -1,4 +1,5 @@
 #include "st7789_ips.h"
+
 void st7789_init(uint16_t width, uint16_t height) {
   st7789_height = height;
   st7789_width = width;
@@ -191,7 +192,7 @@ void st7789_draw_rectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
 
 void st7789_draw_chinese_string(uint16_t x, uint16_t y, fonts_t font,
                                 uint8_t *str, uint16_t fcolor) {
-  uint8_t distance = st7789_gt30_get_font_detail(font, WIDTH), x0 = x;
+  uint8_t distance = st7789_gt30_get_font_param(font, WIDTH), x0 = x;
   uint8_t buf[3] = {0x00};
   uint16_t offset = 0;
   for (uint8_t i = 0; i < strlen(str) / 3; i++) {
@@ -213,10 +214,9 @@ corresponding addr.
 into a buffer(buf).
 * 5th:display buf on screen(put them into st7789_buffer).
 */
-  uint16_t x0 = x;
-  uint32_t font_addr = st7789_gt30_get_font_detail(type, BASEADDR);
-  uint16_t fontsize = st7789_gt30_get_font_detail(type, SIZE),
-           fontwidth = st7789_gt30_get_font_detail(type, WIDTH);
+  uint32_t font_addr = st7789_gt30_get_font_param(type, BASEADDR);
+  uint16_t fontsize = st7789_gt30_get_font_param(type, SIZE),
+           fontwidth = st7789_gt30_get_font_param(type, WIDTH);
   uint8_t gb2312_code[2] = {0x00};
   st7789_gt30_convert_utf8_to_gb2312(ch, sizeof ch, gb2312_code,
                                      sizeof gb2312_code);
@@ -226,11 +226,11 @@ into a buffer(buf).
   uint8_t data[128] = {0x00};
   st7789_gt30_read_data(addr_buf, data, fontsize);
   st7789_delay(1);
-  st7789_display_font_data(x, y, fontwidth, fontwidth, fontsize, data, fcolor,
+  st7789_draw_font_data(x, y, fontwidth, fontwidth, fontsize, data, fcolor,
                            0);
 }
 
-void st7789_display_font_data(uint16_t x, uint16_t y, uint16_t fontwidth,
+void st7789_draw_font_data(uint16_t x, uint16_t y, uint16_t fontwidth,
                               uint16_t fontheight, uint16_t fontsize,
                               uint8_t *buf, uint16_t color, uint8_t spec) {
   uint16_t x0 = x;
@@ -258,11 +258,11 @@ void st7789_draw_ascii_char(uint16_t x, uint16_t y, fonts_t type, uint8_t ch,
   into a buffer(buf).
   * 5th:display buf on screen(put them into st7789_buffer).
   */
-  uint32_t baseaddr = st7789_gt30_get_font_detail(type, BASEADDR);
-  uint16_t fontsize = st7789_gt30_get_font_detail(type, SIZE),
-           fontwidth = st7789_gt30_get_font_detail(type, WIDTH),
-           fontheight = st7789_gt30_get_font_detail(type, HEIGHT),
-           spec = st7789_gt30_get_font_detail(type, OFFSET);
+  uint32_t baseaddr = st7789_gt30_get_font_param(type, BASEADDR);
+  uint16_t fontsize = st7789_gt30_get_font_param(type, SIZE),
+           fontwidth = st7789_gt30_get_font_param(type, WIDTH),
+           fontheight = st7789_gt30_get_font_param(type, HEIGHT),
+           spec = st7789_gt30_get_font_param(type, OFFSET);
   uint8_t offset = 0;
   if (type == ascii_standard_5x7) offset = 8;
   if (offset == 0) offset = fontsize;
@@ -271,13 +271,13 @@ void st7789_draw_ascii_char(uint16_t x, uint16_t y, fonts_t type, uint8_t ch,
   uint8_t addr_buf[3] = {(addr & 0xff0000) >> 16, (addr & 0xff00) >> 8,
                          addr & 0xff};
   st7789_gt30_read_data(addr_buf, buf, fontsize);
-  st7789_display_font_data(x, y, fontwidth, fontheight, fontsize, buf, fcolor,
+  st7789_draw_font_data(x, y, fontwidth, fontheight, fontsize, buf, fcolor,
                            spec);
 }
 
 void st7789_draw_ascii_string(uint16_t x, uint16_t y, fonts_t font,
                               uint8_t *str, uint16_t fcolor) {
-  uint8_t distance = st7789_gt30_get_font_detail(font, WIDTH), x0 = x;
+  uint8_t distance = st7789_gt30_get_font_param(font, WIDTH), x0 = x;
   for (uint8_t i = 0; i < strlen(str); i++) {
     st7789_draw_ascii_char(x0, y, font, str[i], fcolor);
     x0 += distance;
@@ -286,8 +286,8 @@ void st7789_draw_ascii_string(uint16_t x, uint16_t y, fonts_t font,
 
 void st7789_draw_string(uint16_t x, uint16_t y, fonts_t ascfont, fonts_t cnfont,
                         uint8_t *str, uint16_t color) {
-  uint16_t asc_distance = st7789_gt30_get_font_detail(ascfont, WIDTH),
-           cn_distance = st7789_gt30_get_font_detail(cnfont, WIDTH), x0 = x;
+  uint16_t asc_distance = st7789_gt30_get_font_param(ascfont, WIDTH),
+           cn_distance = st7789_gt30_get_font_param(cnfont, WIDTH), x0 = x;
   uint8_t cn_buf[3] = {0x00};
   for (uint16_t i = 0; i < strlen(str); i++) {
     if (str[i] >= 0x20 && str[i] <= 0x7E) {
@@ -303,7 +303,7 @@ void st7789_draw_string(uint16_t x, uint16_t y, fonts_t ascfont, fonts_t cnfont,
 }
 
 void st7789_printf(uint16_t x, uint16_t y, fonts_t ascfont, fonts_t gbfont,
-                   uint16_t color, const uint8_t *fmt, ...) {
+                   uint16_t color, const char *fmt, ...) {
   uint8_t buf[256] = {0x00};
   va_list arg;
   va_start(arg, fmt);
