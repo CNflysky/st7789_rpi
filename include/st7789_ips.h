@@ -93,7 +93,7 @@ void st7789_draw_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
  * @brief component of st7789_draw_circle. shouldn't be called directly,see
  * st7789_draw_circle
  */
-void st7789_precircle(uint16_t xc, uint16_t yc, uint16_t x, uint16_t y,
+static void st7789_precircle(uint16_t xc, uint16_t yc, uint16_t x, uint16_t y,
                       uint16_t color);
 /**
  *
@@ -165,7 +165,7 @@ void st7789_draw_ascii_char(uint16_t x, uint16_t y, fonts_t type, uint8_t ch,
  *
  * @brief component of char display functions. shouldn't be called directly
  */
-void st7789_draw_font_data(uint16_t x, uint16_t y, uint16_t fontwidth,
+static void st7789_draw_font_data(uint16_t x, uint16_t y, uint16_t fontwidth,
                            uint16_t fontheight, uint16_t fontsize, uint8_t *buf,
                            uint16_t color, uint8_t spec);
 /**
