@@ -1,19 +1,15 @@
 #include "st7789_gpio.h"
-struct gpiod_line *st7789_gpiod_request_gpio(const uint8_t *gpiochip,
-                                             const uint8_t *linename, int pin) {
-  struct gpiod_chip *chip = gpiod_chip_open_by_name(gpiochip);
-  if (!chip) {
-    perror("Error:open chip failed");
-    exit(1);
-  }
-  struct gpiod_line *line = gpiod_chip_get_line(chip, pin);
-  if (!line) {
-    perror("Error:get gpio line failed");
-    exit(1);
-  }
-  if (gpiod_line_request_output(line, linename, 0) < 0) {
-    perror("Error:set gpio to output failed");
-    exit(1);
-  }
-  return line;
+void st7789_gpiod_request_gpio(st7789config_t *config, st7789_t *st7789) {
+  struct gpiod_chip *chip = gpiod_chip_open_by_name(config->gpio_dc_chip);
+
+  st7789->gpio_dc = gpiod_chip_get_line(chip, config->dc_pin);
+  if (!(st7789->gpio_dc)) pabort("Error:get gpio line failed");
+  if (gpiod_line_request_output(st7789->gpio_dc, "gpio_dc", 0) < 0)
+    pabort("Error:set gpio to output failed");
+
+  chip = gpiod_chip_open_by_name(config->gpio_reset_chip);
+  st7789->gpio_reset = gpiod_chip_get_line(chip, config->reset_pin);
+  if (!(st7789->gpio_reset)) pabort("Error:get gpio line failed");
+  if (gpiod_line_request_output(st7789->gpio_reset, "gpio_reset", 1) < 0)
+    pabort("Error:set gpio to output failed");
 }

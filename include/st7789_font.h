@@ -34,7 +34,7 @@ typedef enum { BASEADDR, SIZE, WIDTH, HEIGHT, OFFSET } fontdata_t;
 
 #include <iconv.h>
 
-#include "st7789_spi.h"
+#include "st7789_def.h"
 
 int st7789_gt30_spi_fd;
 int st7789_gt30_spi_speed;
