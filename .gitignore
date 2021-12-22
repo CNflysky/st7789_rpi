@@ -35,7 +35,6 @@
 *.i*86
 *.x86_64
 *.hex
-st7789
 
 # Debug files
 *.dSYM/
@@ -51,8 +50,12 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
 #dts file
 *.dts
 
-#vscode file
+#vscode directory
 .vscode
+
+#cmake directory
+build

@@ -1,3 +1,0 @@
-/home/flysky/st7789v/build/CMakeFiles/rebuild_cache.dir
-/home/flysky/st7789v/build/CMakeFiles/st7789.dir
-/home/flysky/st7789v/build/CMakeFiles/edit_cache.dir
