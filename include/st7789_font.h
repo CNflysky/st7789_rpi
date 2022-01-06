@@ -1,5 +1,19 @@
 #ifndef _ST7789_FONT_H_
 #define _ST7789_FONT_H_
+
+#include <iconv.h>
+
+#include "st7789_def.h"
+
+typedef struct {
+  const char* spi_path;
+  uint32_t spi_speed;
+} gt30config_t;
+
+typedef struct {
+  int spi_fd;
+  uint32_t spi_speed;
+} gt30_t;
 /*
   enum for fonts.
 */
@@ -32,39 +46,7 @@ typedef enum {
 // font param types.
 typedef enum { BASEADDR, SIZE, WIDTH, HEIGHT, OFFSET } fontdata_t;
 
-#include <iconv.h>
-
-#include "st7789_def.h"
-
-int st7789_gt30_spi_fd;
-int st7789_gt30_spi_speed;
-/**
- *
- * @brief open spi file descriptor for the GT30 font chip.
- * @param path spidev file path (e.g. /dev/spidev0.0)
- * @return None
- * @note
- */
-void st7789_gt30_spi_open(uint8_t* path);
-
-/**
- *
- * @brief set gt30 spi mode
- * @param mode spi mode(can be SPI_MODE0,SPI_MODE1,SPI_MODE2 and SPI_MODE3).
- * @return None
- * @note
- */
-void st7789_gt30_spi_set_mode(uint8_t mode);
-
-/**
- *
- * @brief set gt20 spi speed
- * @param speed spi speed (in hz)
- * @return None
- * @note
- */
-void st7789_gt30_spi_set_speed(uint32_t speed);
-
+void st7789_gt30_init(gt30config_t* config, gt30_t* gt30);
 /**
  *
  * @brief read character data from addr to data buffer with specified length.
@@ -74,7 +56,7 @@ void st7789_gt30_spi_set_speed(uint32_t speed);
  * @return None
  * @note
  */
-void st7789_gt30_read_data(uint8_t* addr, uint8_t* data, uint16_t len);
+void st7789_gt30_read_data(gt30_t* gt30,uint8_t* addr, uint8_t* data, uint16_t len);
 
 /**
  *
@@ -135,6 +117,6 @@ uint32_t st7789_gt30_get_font_param(fonts_t font, fontdata_t type);
  * @return None
  * @note
  */
-void st7789_gt30_close_spi_fd();
+void st7789_gt30_close_spi_fd(gt30_t* gt30);
 
 #endif

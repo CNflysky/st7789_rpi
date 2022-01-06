@@ -4,65 +4,64 @@
 #else
 #define _POINTER_CONVERT_TO_ uint64_t
 #endif
-void st7789_gt30_spi_open(uint8_t* path) {
-  if ((st7789_gt30_spi_fd = open(path, O_NONBLOCK)) < 0) {
-    perror("Error:open font chip spidev failed!");
-    exit(EXIT_FAILURE);
-  } else {
-    int bitsperword = 8;
-    ioctl(st7789_gt30_spi_fd, SPI_IOC_WR_BITS_PER_WORD, &bitsperword);
-  }
+
+void st7789_gt30_spi_open(gt30config_t* config, gt30_t* gt30);
+void st7789_gt30_spi_set_mode(gt30_t* gt30);
+void st7789_gt30_spi_set_speed(gt30_t* gt30);
+
+void st7789_gt30_init(gt30config_t* config, gt30_t* gt30) {
+  st7789_gt30_spi_open(config, gt30);
+  st7789_gt30_spi_set_mode(gt30);
+  st7789_gt30_spi_set_speed(gt30);
 }
 
-void st7789_gt30_spi_set_mode(uint8_t mode) {
-  int st7789_gt30_spi_mode = mode;
-  if (ioctl(st7789_gt30_spi_fd, SPI_IOC_WR_MODE, &st7789_gt30_spi_mode) < 0) {
-    perror("Error setting gt30 spi mode");
-    exit(EXIT_FAILURE);
-  }
+void st7789_gt30_spi_open(gt30config_t* config, gt30_t* gt30) {
+  gt30->spi_speed = config->spi_speed;
+  int spi_fd = open(config->spi_path, O_NONBLOCK);
+  if (spi_fd < 0)
+    pabort("Error opening gt30 spi");
+  else
+    gt30->spi_fd = spi_fd;
 }
 
-void st7789_gt30_spi_set_speed(uint32_t speed) {
-  st7789_gt30_spi_speed = speed;
-  if (ioctl(st7789_gt30_spi_fd, SPI_IOC_WR_MAX_SPEED_HZ,
-            &st7789_gt30_spi_speed) < 0) {
-    perror("Error setting gt30 spi speed");
-    exit(EXIT_FAILURE);
-  }
+void st7789_gt30_spi_set_mode(gt30_t* gt30) {
+  int spi_mode = SPI_MODE_0;
+  if (ioctl(gt30->spi_fd, SPI_IOC_WR_MODE, &spi_mode) < 0)
+    pabort("Error setting gt30 spi mode");
 }
 
-void st7789_gt30_read_data(uint8_t* addr, uint8_t* data, uint16_t len) {
+void st7789_gt30_spi_set_speed(gt30_t* gt30) {
+  if (ioctl(gt30->spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &(gt30->spi_speed)) < 0)
+    pabort("Error setting gt30 spi speed");
+}
+
+void st7789_gt30_read_data(gt30_t* gt30, uint8_t* addr, uint8_t* data,
+                           uint16_t len) {
   uint8_t cmd_with_addr[4] = {0x03};
   memcpy(cmd_with_addr + 1, addr, 3);
   struct spi_ioc_transfer spi_cmd = {
-      .speed_hz = st7789_gt30_spi_speed,
+      .speed_hz = gt30->spi_speed,
       .tx_buf = (_POINTER_CONVERT_TO_)cmd_with_addr,
       .rx_buf = 0,
       .delay_usecs = 0,
       .len = 4,
       .cs_change = true};
-  if (ioctl(st7789_gt30_spi_fd, SPI_IOC_MESSAGE(1), &spi_cmd) < 0) {
-    perror("Error:send command and address to gt30 error");
-    exit(EXIT_FAILURE);
-  }
-  struct spi_ioc_transfer spi_data = {.speed_hz = st7789_gt30_spi_speed,
+  if (ioctl(gt30->spi_fd, SPI_IOC_MESSAGE(1), &spi_cmd) < 0)
+    pabort("Error:send command and address to gt30 error");
+  struct spi_ioc_transfer spi_data = {.speed_hz = gt30->spi_speed,
                                       .tx_buf = (_POINTER_CONVERT_TO_)data,
                                       .rx_buf = (_POINTER_CONVERT_TO_)data,
                                       .delay_usecs = 0,
                                       .len = len};
-  if (ioctl(st7789_gt30_spi_fd, SPI_IOC_MESSAGE(1), &spi_data) < 0) {
-    perror("Error:send data to gt30 error");
-    exit(EXIT_FAILURE);
-  }
+  if (ioctl(gt30->spi_fd, SPI_IOC_MESSAGE(1), &spi_data) < 0)
+    pabort("Error:send data to gt30 error");
 }
 
 void st7789_gt30_convert_utf8_to_gb2312(uint8_t* str, uint16_t in_len,
                                         uint8_t* outbuf, uint16_t out_len) {
   iconv_t conv;
-  if ((conv = iconv_open("GB2312//IGNORE", "UTF-8")) < 0) {
-    perror("Error:open iconv_t failed");
-    exit(EXIT_FAILURE);
-  }
+  if ((conv = iconv_open("GB2312//IGNORE", "UTF-8")) < 0)
+    pabort("Error:open iconv_t failed");
   uint8_t in_buffer[in_len];
   strcpy(in_buffer, str);
   size_t in_buffer_len = strlen(in_buffer);
@@ -72,10 +71,8 @@ void st7789_gt30_convert_utf8_to_gb2312(uint8_t* str, uint16_t in_len,
   uint8_t* pinbuf = in_buffer;
   uint8_t* poutbuf = outbuf;
   if (iconv(conv, (char**)&pinbuf, &in_buffer_len, (char**)&poutbuf,
-            &out_buffer_len) < 0) {
-    perror("Error:iconv convert failed");
-    exit(EXIT_FAILURE);
-  }
+            &out_buffer_len) < 0)
+    pabort("Error:iconv convert failed");
   iconv_close(conv);
 }
 
@@ -101,7 +98,7 @@ uint32_t st7789_gt30_get_ascii_addr(uint32_t baseaddr, uint16_t fontsize,
   else
     return -1;
 }
-void st7789_gt30_close_spi_fd() { close(st7789_gt30_spi_fd); }
+void st7789_gt30_close_spi_fd(gt30_t* gt30) { close(gt30->spi_fd); }
 
 uint32_t st7789_gt30_get_font_param(fonts_t font, fontdata_t type) {
   switch (font) {

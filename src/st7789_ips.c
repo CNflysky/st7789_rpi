@@ -73,7 +73,6 @@ void st7789_init(st7789config_t *config, st7789_t *st7789) {
   st7789_spi_write_8bit(st7789, COMMAND, 0x21);
   st7789_spi_write_8bit(st7789, COMMAND, 0x11);
   st7789_clear_buf(st7789);
-  st7789_clear_screen(st7789);
   st7789_send_buf(st7789);
   st7789_spi_write_8bit(st7789, COMMAND, 0x29);
   st7789_spi_write_8bit(st7789, COMMAND, 0x36);
@@ -211,14 +210,15 @@ void st7789_draw_rectangle(st7789_t *st7789, uint16_t x1, uint16_t y1,
   }
 }
 
-void st7789_draw_chinese_string(st7789_t *st7789, uint16_t x, uint16_t y,
-                                fonts_t font, uint8_t *str, uint16_t fcolor) {
+void st7789_draw_chinese_string(st7789_t *st7789, gt30_t *gt30, uint16_t x,
+                                uint16_t y, fonts_t font, uint8_t *str,
+                                uint16_t fcolor) {
   uint8_t distance = st7789_gt30_get_font_param(font, WIDTH), x0 = x;
   uint8_t buf[3] = {0x00};
   uint16_t offset = 0;
   for (uint8_t i = 0; i < strlen(str) / 3; i++) {
     memcpy(buf, str + offset, 3);
-    st7789_draw_chinese_char(st7789, x0, y, font, buf, fcolor);
+    st7789_draw_chinese_char(st7789, gt30, x0, y, font, buf, fcolor);
     offset += 3;
     x0 += distance;
   }
@@ -243,8 +243,9 @@ static void st7789_draw_font_data(st7789_t *st7789, uint16_t x, uint16_t y,
   }
 }
 
-void st7789_draw_chinese_char(st7789_t *st7789, uint16_t x, uint16_t y,
-                              fonts_t type, uint8_t *ch, uint16_t fcolor) {
+void st7789_draw_chinese_char(st7789_t *st7789, gt30_t *gt30, uint16_t x,
+                              uint16_t y, fonts_t type, uint8_t *ch,
+                              uint16_t fcolor) {
   uint32_t font_addr = st7789_gt30_get_font_param(type, BASEADDR);
   uint16_t fontsize = st7789_gt30_get_font_param(type, SIZE),
            fontwidth = st7789_gt30_get_font_param(type, WIDTH);
@@ -255,14 +256,15 @@ void st7789_draw_chinese_char(st7789_t *st7789, uint16_t x, uint16_t y,
   st7789_gt30_get_gb2312_addr(type, gb2312_code[0], gb2312_code[1], font_addr,
                               fontsize, addr_buf);
   uint8_t data[128] = {0x00};
-  st7789_gt30_read_data(addr_buf, data, fontsize);
+  st7789_gt30_read_data(gt30, addr_buf, data, fontsize);
   usleep(1000);  // 1ms
   st7789_draw_font_data(st7789, x, y, fontwidth, fontwidth, fontsize, data,
                         fcolor, 0);
 }
 
-void st7789_draw_ascii_char(st7789_t *st7789, uint16_t x, uint16_t y,
-                            fonts_t type, uint8_t ch, uint16_t fcolor) {
+void st7789_draw_ascii_char(st7789_t *st7789, gt30_t *gt30, uint16_t x,
+                            uint16_t y, fonts_t type, uint8_t ch,
+                            uint16_t fcolor) {
   uint32_t baseaddr = st7789_gt30_get_font_param(type, BASEADDR);
   uint16_t fontsize = st7789_gt30_get_font_param(type, SIZE),
            fontwidth = st7789_gt30_get_font_param(type, WIDTH),
@@ -275,21 +277,22 @@ void st7789_draw_ascii_char(st7789_t *st7789, uint16_t x, uint16_t y,
   uint32_t addr = st7789_gt30_get_ascii_addr(baseaddr, offset, ch);
   uint8_t addr_buf[3] = {(addr & 0xff0000) >> 16, (addr & 0xff00) >> 8,
                          addr & 0xff};
-  st7789_gt30_read_data(addr_buf, buf, fontsize);
+  st7789_gt30_read_data(gt30, addr_buf, buf, fontsize);
   st7789_draw_font_data(st7789, x, y, fontwidth, fontheight, fontsize, buf,
                         fcolor, spec);
 }
 
-void st7789_draw_ascii_string(st7789_t *st7789, uint16_t x, uint16_t y,
-                              fonts_t font, uint8_t *str, uint16_t fcolor) {
+void st7789_draw_ascii_string(st7789_t *st7789, gt30_t *gt30, uint16_t x,
+                              uint16_t y, fonts_t font, uint8_t *str,
+                              uint16_t fcolor) {
   uint8_t distance = st7789_gt30_get_font_param(font, WIDTH), x0 = x;
   for (uint8_t i = 0; i < strlen(str); i++) {
-    st7789_draw_ascii_char(st7789, x0, y, font, str[i], fcolor);
+    st7789_draw_ascii_char(st7789, gt30, x0, y, font, str[i], fcolor);
     x0 += distance;
   }
 }
 
-void st7789_draw_string(st7789_t *st7789, uint16_t x, uint16_t y,
+void st7789_draw_string(st7789_t *st7789, gt30_t *gt30, uint16_t x, uint16_t y,
                         fonts_t ascfont, fonts_t cnfont, uint8_t *str,
                         uint16_t color) {
   uint16_t asc_distance = st7789_gt30_get_font_param(ascfont, WIDTH),
@@ -297,25 +300,26 @@ void st7789_draw_string(st7789_t *st7789, uint16_t x, uint16_t y,
   uint8_t cn_buf[3] = {0x00};
   for (uint16_t i = 0; i < strlen(str); i++) {
     if (str[i] >= 0x20 && str[i] <= 0x7E) {
-      st7789_draw_ascii_char(st7789, x0, y, ascfont, str[i], color);
+      st7789_draw_ascii_char(st7789, gt30, x0, y, ascfont, str[i], color);
       x0 += asc_distance;
     } else {
       memcpy(cn_buf, &str[i], 3);  // chinese
       i += 2;
-      st7789_draw_chinese_char(st7789, x0, y, cnfont, cn_buf, color);
+      st7789_draw_chinese_char(st7789, gt30, x0, y, cnfont, cn_buf, color);
       x0 += cn_distance;
     }
   }
 }
 
-void st7789_printf(st7789_t *st7789, uint16_t x, uint16_t y, fonts_t ascfont,
-                   fonts_t gbfont, uint16_t color, const char *fmt, ...) {
+void st7789_printf(st7789_t *st7789, gt30_t *gt30, uint16_t x, uint16_t y,
+                   fonts_t ascfont, fonts_t gbfont, uint16_t color,
+                   const char *fmt, ...) {
   uint8_t buf[256] = {0x00};
   va_list arg;
   va_start(arg, fmt);
   vsprintf(buf, fmt, arg);
   va_end(arg);
-  st7789_draw_string(st7789, x, y, ascfont, gbfont, buf, color);
+  st7789_draw_string(st7789, gt30, x, y, ascfont, gbfont, buf, color);
 }
 
 void st7789_draw_pic(st7789_t *st7789, uint16_t x, uint16_t y,
