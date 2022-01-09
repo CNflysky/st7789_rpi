@@ -1,17 +1,19 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(st7789)
+project(st7789 LANGUAGES C)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SOURCES)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_library(st7789_lib STATIC ${SOURCES})
 
-target_include_directories(${PROJECT_NAME}
-    PRIVATE
+target_include_directories( st7789_lib
+    PUBLIC
         ${PROJECT_SOURCE_DIR}/include
 )
 
-target_link_libraries(${PROJECT_NAME} gpiod)
+add_executable(${PROJECT_NAME} examples/single_device_test.c)
+
+target_link_libraries(${PROJECT_NAME} gpiod st7789_lib)
 
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 
