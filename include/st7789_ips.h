@@ -30,7 +30,8 @@ void st7789_draw_ascii_string(uint16_t x, uint16_t y, fonts_t font,
 void st7789_draw_string(uint16_t x, uint16_t y, fonts_t ascfont, fonts_t cnfont,
                         uint8_t *str, uint16_t color);
 void st7789_printf(uint16_t x, uint16_t y, fonts_t ascfont, fonts_t gbfont,
-                   uint16_t color, const char *fmt, ...);
+                   uint16_t color, const char *fmt, ...)
+    __attribute__((format(printf, 6, 7)));
 void st7789_draw_pic(uint16_t x, uint16_t y, uint16_t pic_width,
                      uint16_t pic_height, uint8_t *pic);
 #endif

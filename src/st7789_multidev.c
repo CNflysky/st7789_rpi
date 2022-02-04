@@ -153,8 +153,6 @@ static void st7789_multidev_draw_font_data(st7789_t *st7789, uint16_t x,
                                            uint16_t fontsize, uint8_t *buf,
                                            uint16_t color, uint8_t spec) {
   uint16_t x0 = x;
-  st7789_multidev_set_display_area(st7789, x, y, x + fontwidth - 1,
-                                   y + fontheight - 1);
   for (uint8_t i = spec; i < fontsize; i++) {
     for (uint8_t k = 0; k < 8; k++) {
       if (buf[i] & (0x80 >> k)) st7789_multidev_draw_pixel(st7789, x, y, color);
