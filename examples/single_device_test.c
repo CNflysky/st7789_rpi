@@ -2,6 +2,11 @@
 
 #include "qrcode.h"
 #include "st7789_ips.h"
+
+// #define OPIZERO
+#define RPI4B
+
+#ifdef OPIZERO
 st7789config_t config = {.dc_pin = 2,
                          .reset_pin = 3,
                          .gpio_dc_chip = "gpiochip0",
@@ -10,8 +15,20 @@ st7789config_t config = {.dc_pin = 2,
                          .width = 240,
                          .spi_path = "/dev/spidev1.0",
                          .spi_speed = 40000000};
-st7789_t st7789 = {0};
 gt30config_t gt30conf = {.spi_path = "/dev/spidev1.1", .spi_speed = 40000000};
+#elif defined RPI4B
+st7789config_t config = {.dc_pin = 18,
+                         .reset_pin = 17,
+                         .gpio_dc_chip = "gpiochip0",
+                         .gpio_reset_chip = "gpiochip0",
+                         .height = 240,
+                         .width = 240,
+                         .spi_path = "/dev/spidev0.0",
+                         .spi_speed = 40000000};
+gt30config_t gt30conf = {.spi_path = "/dev/spidev0.1", .spi_speed = 40000000};
+#endif
+
+st7789_t st7789 = {0};
 gt30_t gt30 = {0};
 void st7789_test_procedure();
 
@@ -23,7 +40,7 @@ void exit_handler() {
 
 int main() {
   signal(SIGINT, exit_handler);
-  st7789_init(&config, &st7789);
+  st7789_init(&config, &st7789);  // modify me!
   st7789_gt30_init(&gt30conf, &gt30);
   st7789_set_default_device(&st7789);
   st7789_set_default_fontchip(&gt30);
