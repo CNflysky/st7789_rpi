@@ -1,8 +1,8 @@
 #ifndef _ST7789_IPS_H_
 #define _ST7789_IPS_H_
 #include "st7789_multidev.h"
-st7789_t *default_st7789;
-gt30_t *default_gt30;
+extern st7789_t *default_st7789;
+extern gt30_t *default_gt30;
 void st7789_init(st7789config_t *config, st7789_t *st7789);
 void st7789_set_default_device(st7789_t *st7789);
 void st7789_set_default_fontchip(gt30_t *gt30);
