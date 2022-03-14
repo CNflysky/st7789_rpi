@@ -1,5 +1,6 @@
 #include "st7789_ips.h"
-
+st7789_t *default_st7789 = {0};
+gt30_t *default_gt30 = {0};
 void st7789_init(st7789config_t *config, st7789_t *st7789) {
   st7789->width = config->width;
   st7789->height = config->height;
