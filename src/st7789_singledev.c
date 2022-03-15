@@ -1,4 +1,4 @@
-#include "st7789_ips.h"
+#include "st7789_singledev.h"
 st7789_t *default_st7789 = {0};
 gt30_t *default_gt30 = {0};
 void st7789_init(st7789config_t *config, st7789_t *st7789) {

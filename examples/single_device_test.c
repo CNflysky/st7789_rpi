@@ -1,7 +1,7 @@
 #include <signal.h>
 
 #include "qrcode.h"
-#include "st7789_ips.h"
+#include "st7789_singledev.h"
 
 // #define OPIZERO
 #define RPI4B
@@ -36,11 +36,12 @@ void exit_handler() {
   st7789_clear_screen();
   st7789_send_buf(&st7789);
   st7789_gt30_close_spi_fd(&gt30);
+  st7789_gpiod_release_resources(&st7789);
 }
 
 int main() {
   signal(SIGINT, exit_handler);
-  st7789_init(&config, &st7789);  // modify me!
+  st7789_init(&config, &st7789);
   st7789_gt30_init(&gt30conf, &gt30);
   st7789_set_default_device(&st7789);
   st7789_set_default_fontchip(&gt30);
