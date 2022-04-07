@@ -134,7 +134,7 @@
 `git clone https://github.com/CNflysky/st7789_rpi.git`  
 
 ## 修改引脚定义
-打开 ``examples/single_device_test.c`,注意观察 `st7789config_t config` 结构体,修改 `dc_pin` 和 `cs_pin`.
+打开 `examples/single_device_test.c`,找到 `st7789config_t config` 结构体,修改 `dc_pin` 和 `cs_pin`.
 如果有必要，修改 `gpio_dc_chip` 与 `gpio_reset_chip` 以配合你的引脚设定.
 ```c
 st7789config_t config = {.dc_pin = 18,
